@@ -1,0 +1,97 @@
+﻿@page "/clientes"
+@rendermode InteractiveServer
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card">
+                    <div class="card-header">
+                        <button class="btn btn-primary float-end"
+                                @onclick="NavigateToAddClientePage">
+                            Novo Cliente
+                        </button>
+                    </div>
+                </div>
+                @if (Clientes.Count > 0)
+                {
+                    <div class="card-header">
+                        Lista de clientes
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cliente in Clientes)
+                                {
+                                    <tr>
+                                        <td>@cliente.Id</td>
+                                        <td>@cliente.Nome</td>
+                                        <td>@cliente.Email</td>
+                                        <td>
+                                            <div class="hstack gap-2">
+                                                <button class="btn  btn-info" @onclick="()=>Edit(cliente)"> Edita</button>
+                                                <button class="btn  btn-danger" @onclick="() => Delete(cliente.Id)"> Deleta</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info"> Nenhum cliente disponível </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Cliente> Clientes { get; set; } = new();
+
+    private async Task CarregaClientes()
+    {
+        var clientes = await _clienteService.GetAllClientesAsync();
+
+        Clientes?.Clear();
+
+        if (Clientes is null) return;
+
+        foreach (var cliente in clientes)
+            Clientes.Add(cliente);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregaClientes();
+    }
+
+    //incluir
+    private void NavigateToAddClientePage()
+    {
+        _navigation.NavigateTo("manutencaocliente");
+    }
+
+    //editar
+    private void Edit(Cliente model)
+    {
+        _navigation.NavigateTo($"manutencaocliente/{model.Id}");
+    }
+
+    //deletar
+    private async Task Delete(int id)
+    {
+        var cliente = await _clienteService.DeleteClienteAsync(id);
+        await CarregaClientes();
+    }
+}

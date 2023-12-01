@@ -1,0 +1,70 @@
+﻿@page "/manutencaocliente"
+@page "/manutencaocliente/{Id:int}"
+@rendermode InteractiveAuto
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">Manutenção</div>
+                <div class="card-body">
+                    <EditForm Model="ClienteModel" OnValidSubmit="HandleSalvar" FormName="Cliente">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="form-group">
+                            <label class="form-label">Nome</label>
+                            <InputText @bind-Value="ClienteModel.Nome" class="form-control"></InputText>
+                            <ValidationMessage For="()=>ClienteModel.Nome"></ValidationMessage>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="ClienteModel.Email" class="form-control"></InputText>
+                            <ValidationMessage For="()=>ClienteModel.Email"></ValidationMessage>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Idade</label>
+                            <InputNumber @bind-Value="ClienteModel.Idade" class="form-control"></InputNumber>
+                            <ValidationMessage For="()=>ClienteModel.Idade"></ValidationMessage>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-2"> Salvar</button>
+                    </EditForm>
+                </div>
+
+                <div class="card-footer">
+                    @* Id: @ReturnCliente.Id <br /> *@
+                    Nome:@ReturnCliente.Nome <br />
+                    Email: @ReturnCliente.Email <br />
+                    Idade: @ReturnCliente.Idade
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+
+    public Cliente ClienteModel { get; set; } = new();
+    [Parameter] public int Id { get; set; }
+
+    private Cliente ReturnCliente = new();
+
+    private async Task HandleSalvar()
+    {
+        if (ClienteModel.Id > 0)
+        {
+            ReturnCliente = await _clienteService.UpdateClienteAsync(ClienteModel);
+            ClienteModel = new();
+        }
+        else
+        {
+            ReturnCliente = await _clienteService.AddClienteAsync(ClienteModel);
+            ClienteModel = new();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id > 0)
+            ClienteModel = await _clienteService.GetClienteByIdAsync(Id);
+    }
+}
